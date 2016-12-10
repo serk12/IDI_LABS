@@ -7,7 +7,8 @@
 #include <QMouseEvent>
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
-
+#include "glm/gtc/matrix_inverse.hpp" //
+#include <glm/gtc/type_ptr.hpp>  //
 #include "model.h"
 
 class MyGLWidget : public QOpenGLWidget, protected QOpenGLFunctions_3_3_Core 
@@ -35,18 +36,25 @@ class MyGLWidget : public QOpenGLWidget, protected QOpenGLFunctions_3_3_Core
     void modelTransformTerra ();
     void modelTransformPatricio ();
     void calculaCapsaModel ();
-
+    
+    
+    void llumTransform ();
+    void llumSCO();
+    void normMat();
+    float llumX;
+    
+    
     GLuint VAO_Patr, VBO_PatrPos, VBO_PatrNorm, VBO_PatrMatamb, VBO_PatrMatdiff, VBO_PatrMatspec, VBO_PatrMatshin;
     GLuint VAO_Terra, VBO_TerraPos, VBO_TerraNorm, VBO_TerraMatamb, VBO_TerraMatdiff, VBO_TerraMatspec, VBO_TerraMatshin;
     QOpenGLShaderProgram *program;
-    GLuint transLoc, projLoc, viewLoc;
+    GLuint transLoc, projLoc, viewLoc,scoLlum, normalM;
     GLuint vertexLoc, normalLoc, matambLoc, matdiffLoc, matspecLoc, matshinLoc;
 
     Model patr;
     glm::vec3 centrePatr;
     float escala;
     float radiEsc;
-
+    
     typedef  enum {NONE, ROTATE} InteractiveAction;
     InteractiveAction DoingInteractive;
     int xClick, yClick;

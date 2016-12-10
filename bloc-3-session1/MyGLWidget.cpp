@@ -10,6 +10,7 @@ MyGLWidget::MyGLWidget (QWidget* parent) : QOpenGLWidget(parent)
   perspectiva = true;
   DoingInteractive = NONE;
   radiEsc = sqrt(3);
+  llumX = 1; //ex 6
 }
 
 MyGLWidget::~MyGLWidget ()
@@ -28,6 +29,7 @@ void MyGLWidget::initializeGL ()
   createBuffers();
   projectTransform ();
   viewTransform ();
+  llumTransform(); //ex 5
 }
 
 void MyGLWidget::paintGL () 
@@ -122,12 +124,12 @@ void MyGLWidget::createBuffers ()
 	norm1, norm1, norm1, norm1, norm1, norm1,
 	norm2, norm2, norm2, norm2, norm2, norm2
   };
-
-  glm::vec3 amb(0.2,0,0.2);
-  glm::vec3 diff(0.8,0,0.8);
-  glm::vec3 spec(0,0,0);
-  float shin = 100;
-
+    //ex 3 {
+  glm::vec3 amb(0,0,1);
+  glm::vec3 diff(0,0,0);
+  glm::vec3 spec(0.8,0.8,0.8);
+  float shin = 30;
+    //ex 3 }
   glm::vec3 matambterra[12] = {
 	amb, amb, amb, amb, amb, amb, amb, amb, amb, amb, amb, amb
   };
@@ -211,6 +213,10 @@ void MyGLWidget::carregaShaders()
   transLoc = glGetUniformLocation (program->programId(), "TG");
   projLoc = glGetUniformLocation (program->programId(), "proj");
   viewLoc = glGetUniformLocation (program->programId(), "view");
+  
+  
+  normalM  = glGetUniformLocation (program->programId(), "NormalMatrix"); // ex 5
+  scoLlum  = glGetUniformLocation (program->programId(), "scoLlum");      // ex 5
 }
 
 void MyGLWidget::modelTransformPatricio ()
@@ -273,20 +279,6 @@ void MyGLWidget::calculaCapsaModel ()
   centrePatr[0] = (minx+maxx)/2.0; centrePatr[1] = (miny+maxy)/2.0; centrePatr[2] = (minz+maxz)/2.0;
 }
 
-void MyGLWidget::keyPressEvent(QKeyEvent* event) 
-{
-  makeCurrent();
-  switch (event->key()) {
-    case Qt::Key_O: {
-      perspectiva = !perspectiva;
-      projectTransform ();
-      break;
-    }
-    default: event->ignore(); break;
-  }
-  update();
-}
-
 void MyGLWidget::mousePressEvent (QMouseEvent *e)
 {
   xClick = e->x();
@@ -320,3 +312,58 @@ void MyGLWidget::mouseMoveEvent(QMouseEvent *e)
 }
 
 
+// ex 5 {
+void MyGLWidget::llumTransform() {
+  normMat();
+  llumSCO();
+}
+// ex 5 }
+// ex 6 {
+void MyGLWidget::keyPressEvent(QKeyEvent* event) 
+{
+  makeCurrent();
+  switch (event->key()) {
+    case Qt::Key_O: {
+      perspectiva = !perspectiva;
+      projectTransform ();
+      break;
+    }
+    case Qt::Key_L: {
+      ++llumX;    
+      llumSCO();
+      break;
+    }    
+    case Qt::Key_K: {
+      --llumX;  
+      llumSCO();
+      break;
+    }
+    default: event->ignore(); break;
+  }
+  update();
+}
+// ex 6 }
+// ex 5 {
+void MyGLWidget::normMat() {
+  glm::mat4 View = glm::translate(glm::mat4(1.f), glm::vec3(0, 0, -2*radiEsc));
+  View = glm::rotate(View, -angleY, glm::vec3(0, 1, 0));
+  
+  glm::mat4 TG(1.f);
+  TG = glm::scale(TG, glm::vec3(escala, escala, escala));
+  TG = glm::translate(TG, -centrePatr);
+  
+  glm::mat3 normal = glm::inverseTranspose(glm::mat3(View*TG));
+  
+  glUniformMatrix3fv(normalM, 1, GL_FALSE, &normal[0][0]);
+  
+}
+
+
+void MyGLWidget::llumSCO() {
+  glm::mat4 View = glm::translate(glm::mat4(1.f), glm::vec3(0, 0, -2*radiEsc));
+  View = glm::rotate(View, -angleY, glm::vec3(0, 1, 0));
+  glm::vec3 llum = glm::vec3 (View * glm::vec4 (llumX,1,1,1));
+  glUniform3fv(scoLlum, 1, glm::value_ptr(llum));
+}
+
+// ex 5 }

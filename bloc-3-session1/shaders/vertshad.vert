@@ -12,6 +12,9 @@ uniform mat4 proj;
 uniform mat4 view;
 uniform mat4 TG;
 
+uniform mat3 NormalMatrix;  //ex 5
+uniform vec3 scoLlum; //ex 5
+
 vec3 colFocus = vec3(0.8, 0.8, 0.8);
 vec3 llumAmbient = vec3(0.2, 0.2, 0.2);
 vec3 posFocus = vec3(1, 1, 1);
@@ -43,6 +46,11 @@ vec3 Phong (vec3 NormSCO, vec3 L, vec4 vertSCO)
 
 void main()
 {	
-    fcolor = matdiff;
     gl_Position = proj * view * TG * vec4 (vertex, 1.0);
+    //     mat3 NormalMatrix = inverse (transpose (mat3 (view*TG))); //NormalMatdix que transforma en es sistema SCO // ex 1 / 2
+    vec3 vecNorm = normalize(NormalMatrix * normal);  //ex 1 / 2
+    //     vec3 scoLlum = vec3 (view * vec4 (1,1,1,1)); //ex 1 / 2
+    vec3 vecVertexLlum = normalize(scoLlum - vec3 (view * TG * vec4 (vertex, 1.0)));//ex 1 / 2
+    vec4 vertexSCO = view * TG * vec4 (vertex, 1.0); //ex 1 / 2
+    fcolor = Phong(vecNorm, vecVertexLlum, vertexSCO); //ex 1 / 2
 }
